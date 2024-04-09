@@ -3,15 +3,18 @@ import Cocoa
 open class StupidNSWindow: NSWindow  {
     // MARK: Magic Numbers
     private static let TITLEBAR_HEIGHT_NORMAL: CGFloat = 22.0
+    private static let TITLEBAR_HEIGHT_TOOLBAR: CGFloat = 38.0
     private static let TABBAR_HEIGHT: CGFloat = 25.0
     private static let WINDOW_BUTTON_WIDTH: CGFloat = 14.0
     private static let WINDOW_BUTTON_HEIGHT: CGFloat = 16.0
+    private static let WINDOW_BUTTON_MARGIN_TOP_NORMAL: CGFloat = 3.0
     private static let WINDOW_BUTTON_CLOSE_MARGIN_LEFT_NORMAL: CGFloat = 7.0
     private static let WINDOW_BUTTON_CLOSE_MARGIN_LEFT_LARGE: CGFloat = 10.0
     private static let WINDOW_BUTTON_MINIATURIZE_OFFSET: CGFloat = 20.0
     private static let WINDOW_BUTTON_ZOOM_OFFSET: CGFloat = 40.0
     
-    private var windowButtonMarginTop: CGFloat = 0
+    // Indicates whether the window buttons and title are vertically centered.
+    public var centerVertically = true
     
     // MARK: Window Buttons Properties
     // The red button
@@ -126,7 +129,6 @@ open class StupidNSWindow: NSWindow  {
     public var titlebarHeight: CGFloat = StupidNSWindow.TITLEBAR_HEIGHT_NORMAL {
         didSet {
             if titlebarHeight != oldValue && titlebarHeight > 0 {
-                windowButtonMarginTop = (titlebarHeight - Self.WINDOW_BUTTON_HEIGHT) / 2
                 minSize = NSSize(width: minSize.width, height: titlebarHeight)
             }
         }
@@ -152,16 +154,24 @@ open class StupidNSWindow: NSWindow  {
             }
             
             if let closeButton = closeButton {
-                let marginLeft = titlebarHeight > Self.TITLEBAR_HEIGHT_NORMAL ? Self.WINDOW_BUTTON_CLOSE_MARGIN_LEFT_LARGE : Self.WINDOW_BUTTON_CLOSE_MARGIN_LEFT_NORMAL
+                let marginLeft = centerVertically && titlebarHeight > Self.TITLEBAR_HEIGHT_NORMAL
+                    ? Self.WINDOW_BUTTON_CLOSE_MARGIN_LEFT_LARGE
+                    : Self.WINDOW_BUTTON_CLOSE_MARGIN_LEFT_NORMAL
+                
                 closeButton.frame.origin.x = marginLeft
-                closeButton.frame.origin.y = windowButtonMarginTop
                 miniaturizeButton!.frame.origin.x = marginLeft + Self.WINDOW_BUTTON_MINIATURIZE_OFFSET
-                miniaturizeButton!.frame.origin.y = windowButtonMarginTop
                 zoomButton!.frame.origin.x = marginLeft + Self.WINDOW_BUTTON_ZOOM_OFFSET
-                zoomButton!.frame.origin.y = windowButtonMarginTop
+                
+                let windowButtonMarginBottom = centerVertically || titlebarHeight < Self.TITLEBAR_HEIGHT_NORMAL
+                    ? (titlebarHeight - Self.WINDOW_BUTTON_HEIGHT) / 2
+                    : titlebarHeight - Self.WINDOW_BUTTON_HEIGHT - Self.WINDOW_BUTTON_MARGIN_TOP_NORMAL
+                
+                closeButton.frame.origin.y = windowButtonMarginBottom
+                miniaturizeButton!.frame.origin.y = windowButtonMarginBottom
+                zoomButton!.frame.origin.y = windowButtonMarginBottom
             }
             
-            if titleTextField != nil && titleVisibility != .hidden {
+            if (centerVertically || titlebarHeight < Self.TITLEBAR_HEIGHT_NORMAL) && titleTextField != nil && titleVisibility != .hidden {
                 // if macOS delete the old titleTextField
                 if titleTextField!.superview == nil {
                     titleTextField = nil
