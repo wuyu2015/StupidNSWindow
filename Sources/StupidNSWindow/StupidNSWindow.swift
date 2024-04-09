@@ -16,6 +16,9 @@ open class StupidNSWindow: NSWindow  {
     // Indicates whether the window buttons and title are vertically centered.
     public var centerVertically = true
     
+    // The view for NSWindow's toolbar
+    public var toolbarView: NSView? = nil
+    
     // MARK: Window Buttons Properties
     // The red button
     public lazy var closeButton: NSButton? = {
@@ -138,6 +141,22 @@ open class StupidNSWindow: NSWindow  {
         didSet {
             if minHeight != oldValue && minHeight > 0 {
                 minSize = NSSize(width: minSize.width, height: minHeight)
+            }
+        }
+    }
+        
+    override public var toolbar: NSToolbar? {
+        didSet {
+            guard toolbar != nil, let titlebarView = titlebarView else {
+                toolbarView = nil
+                return
+            }
+            let width = titlebarView.frame.size.width
+            for view in titlebarView.subviews.reversed() {
+                if view.frame.size.width == width && view != titlebarBackgroundView {
+                    toolbarView = view
+                    return
+                }
             }
         }
     }
