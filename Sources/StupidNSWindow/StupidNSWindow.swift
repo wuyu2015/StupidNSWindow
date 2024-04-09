@@ -13,14 +13,22 @@ open class StupidNSWindow: NSWindow  {
     private static let WINDOW_BUTTON_MINIATURIZE_OFFSET: CGFloat = 20.0
     private static let WINDOW_BUTTON_ZOOM_OFFSET: CGFloat = 40.0
     
-    public var titlebarHeight: CGFloat = StupidNSWindow.TITLEBAR_HEIGHT_NORMAL
-    
-    // Indicates whether the window buttons and title are vertically centered.
-    public var centerVertically = true
-    
     // The view for NSWindow's toolbar
     public var toolbarView: NSView? = nil
     public var toolbarSeparatorView: NSView? = nil
+    
+    // Indicates whether the window buttons and title are vertically centered.
+    public var centerVertically = true  {
+       didSet {
+           minSize.height = centerVertically ? titlebarHeight : Self.TITLEBAR_HEIGHT_NORMAL
+       }
+    }
+    
+    public var titlebarHeight: CGFloat = StupidNSWindow.TITLEBAR_HEIGHT_NORMAL {
+        didSet {
+            minSize.height = centerVertically ? titlebarHeight : Self.TITLEBAR_HEIGHT_NORMAL
+        }
+    }
     
     // MARK: Window Buttons Properties
     // The red button
@@ -214,6 +222,10 @@ open class StupidNSWindow: NSWindow  {
         
         if let titlebarDecorationView = titlebarDecorationView {
             titlebarDecorationView.frame.size.height = titlebarHeight
+        }
+        
+        if let toolbarView = toolbarView {
+            toolbarView.frame.origin.y = titlebarView.frame.origin.y
         }
     }
 }
