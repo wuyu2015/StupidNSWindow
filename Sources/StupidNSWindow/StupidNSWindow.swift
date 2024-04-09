@@ -2,7 +2,7 @@ import Cocoa
 
 open class StupidNSWindow: NSWindow  {
     // MARK: Magic Numbers
-    private static let TITLEBAR_HEIGHT_MIN: CGFloat = 22.0
+    private static let TITLEBAR_HEIGHT_NORMAL: CGFloat = 22.0
     private static let TABBAR_HEIGHT: CGFloat = 25.0
     private static let WINDOW_BUTTON_WIDTH: CGFloat = 14.0
     private static let WINDOW_BUTTON_HEIGHT: CGFloat = 16.0
@@ -123,7 +123,7 @@ open class StupidNSWindow: NSWindow  {
         return false
     }
     
-    public var titlebarHeight: CGFloat = 0 {
+    public var titlebarHeight: CGFloat = StupidNSWindow.TITLEBAR_HEIGHT_NORMAL {
         didSet {
             if titlebarHeight != oldValue && titlebarHeight > 0 {
                 windowButtonMarginTop = (titlebarHeight - Self.WINDOW_BUTTON_HEIGHT) / 2
@@ -143,7 +143,7 @@ open class StupidNSWindow: NSWindow  {
     override public func layoutIfNeeded() {
         super.layoutIfNeeded();
         // Fight with macOS
-        if let titlebarView = titlebarView, let titlebarContainerView = titlebarContainerView, !isFullScreen && titlebarHeight != Self.TITLEBAR_HEIGHT_MIN {
+        if let titlebarView = titlebarView, let titlebarContainerView = titlebarContainerView, !isFullScreen && titlebarHeight != Self.TITLEBAR_HEIGHT_NORMAL {
             titlebarContainerView.frame.size.height = titlebarHeight
             titlebarContainerView.frame.origin.y = themeFrame.frame.size.height - titlebarHeight
             
@@ -152,7 +152,7 @@ open class StupidNSWindow: NSWindow  {
             }
             
             if let closeButton = closeButton {
-                let marginLeft = titlebarHeight > Self.TITLEBAR_HEIGHT_MIN ? Self.WINDOW_BUTTON_CLOSE_MARGIN_LEFT_LARGE : Self.WINDOW_BUTTON_CLOSE_MARGIN_LEFT_NORMAL
+                let marginLeft = titlebarHeight > Self.TITLEBAR_HEIGHT_NORMAL ? Self.WINDOW_BUTTON_CLOSE_MARGIN_LEFT_LARGE : Self.WINDOW_BUTTON_CLOSE_MARGIN_LEFT_NORMAL
                 closeButton.frame.origin.x = marginLeft
                 closeButton.frame.origin.y = windowButtonMarginTop
                 miniaturizeButton!.frame.origin.x = marginLeft + Self.WINDOW_BUTTON_MINIATURIZE_OFFSET
