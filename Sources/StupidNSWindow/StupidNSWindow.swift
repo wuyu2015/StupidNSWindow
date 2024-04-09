@@ -13,11 +13,14 @@ open class StupidNSWindow: NSWindow  {
     private static let WINDOW_BUTTON_MINIATURIZE_OFFSET: CGFloat = 20.0
     private static let WINDOW_BUTTON_ZOOM_OFFSET: CGFloat = 40.0
     
+    public var titlebarHeight: CGFloat = StupidNSWindow.TITLEBAR_HEIGHT_NORMAL
+    
     // Indicates whether the window buttons and title are vertically centered.
     public var centerVertically = true
     
     // The view for NSWindow's toolbar
     public var toolbarView: NSView? = nil
+    public var toolbarSeparatorView: NSView? = nil
     
     // MARK: Window Buttons Properties
     // The red button
@@ -128,33 +131,24 @@ open class StupidNSWindow: NSWindow  {
         }
         return false
     }
-    
-    public var titlebarHeight: CGFloat = StupidNSWindow.TITLEBAR_HEIGHT_NORMAL {
-        didSet {
-            if titlebarHeight != oldValue && titlebarHeight > 0 {
-                minSize = NSSize(width: minSize.width, height: titlebarHeight)
-            }
-        }
-    }
-    
-    public var minHeight: CGFloat = 0 {
-        didSet {
-            if minHeight != oldValue && minHeight > 0 {
-                minSize = NSSize(width: minSize.width, height: minHeight)
-            }
-        }
-    }
         
     override public var toolbar: NSToolbar? {
         didSet {
             guard toolbar != nil, let titlebarView = titlebarView else {
                 toolbarView = nil
+                toolbarSeparatorView = nil
                 return
             }
             let width = titlebarView.frame.size.width
-            for view in titlebarView.subviews.reversed() {
-                if view.frame.size.width == width && view != titlebarBackgroundView {
-                    toolbarView = view
+            for subView1 in titlebarView.subviews.reversed() {
+                if subView1.frame.size.width == width && subView1 != titlebarBackgroundView {
+                    toolbarView = subView1
+                    for subView2 in subView1.subviews {
+                        if subView2.frame.size.width == width && subView2.frame.size.height == 1 {
+                            toolbarSeparatorView = subView2
+                            return
+                        }
+                    }
                     return
                 }
             }
