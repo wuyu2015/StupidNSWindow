@@ -163,60 +163,63 @@ open class StupidNSWindow: NSWindow  {
     
     override public func layoutIfNeeded() {
         super.layoutIfNeeded();
+        
+        guard !isFullScreen && titlebarHeight != Self.TITLEBAR_HEIGHT_NORMAL, let titlebarView = titlebarView, let titlebarContainerView = titlebarContainerView else {
+            return
+        }
+        
         // Fight with macOS
-        if let titlebarView = titlebarView, let titlebarContainerView = titlebarContainerView, !isFullScreen && titlebarHeight != Self.TITLEBAR_HEIGHT_NORMAL {
-            titlebarContainerView.frame.size.height = titlebarHeight
-            titlebarContainerView.frame.origin.y = themeFrame.frame.size.height - titlebarHeight
+        titlebarContainerView.frame.size.height = titlebarHeight
+        titlebarContainerView.frame.origin.y = themeFrame.frame.size.height - titlebarHeight
+        
+        if let titlebarBackgroundView = titlebarBackgroundView {
+            titlebarBackgroundView.frame.size = titlebarView.frame.size
+        }
+        
+        if let closeButton = closeButton {
+            let marginLeft = centerVertically && titlebarHeight > Self.TITLEBAR_HEIGHT_NORMAL
+                ? Self.WINDOW_BUTTON_CLOSE_MARGIN_LEFT_LARGE
+                : Self.WINDOW_BUTTON_CLOSE_MARGIN_LEFT_NORMAL
             
-            if let titlebarBackgroundView = titlebarBackgroundView {
-                titlebarBackgroundView.frame.size = titlebarView.frame.size
-            }
+            closeButton.frame.origin.x = marginLeft
+            miniaturizeButton!.frame.origin.x = marginLeft + Self.WINDOW_BUTTON_MINIATURIZE_OFFSET
+            zoomButton!.frame.origin.x = marginLeft + Self.WINDOW_BUTTON_ZOOM_OFFSET
             
-            if let closeButton = closeButton {
-                let marginLeft = centerVertically && titlebarHeight > Self.TITLEBAR_HEIGHT_NORMAL
-                    ? Self.WINDOW_BUTTON_CLOSE_MARGIN_LEFT_LARGE
-                    : Self.WINDOW_BUTTON_CLOSE_MARGIN_LEFT_NORMAL
-                
-                closeButton.frame.origin.x = marginLeft
-                miniaturizeButton!.frame.origin.x = marginLeft + Self.WINDOW_BUTTON_MINIATURIZE_OFFSET
-                zoomButton!.frame.origin.x = marginLeft + Self.WINDOW_BUTTON_ZOOM_OFFSET
-                
-                let windowButtonMarginBottom = centerVertically || titlebarHeight < Self.TITLEBAR_HEIGHT_NORMAL
-                    ? (titlebarHeight - Self.WINDOW_BUTTON_HEIGHT) / 2
-                    : titlebarHeight - Self.WINDOW_BUTTON_HEIGHT - Self.WINDOW_BUTTON_MARGIN_TOP_NORMAL
-                
-                closeButton.frame.origin.y = windowButtonMarginBottom
-                miniaturizeButton!.frame.origin.y = windowButtonMarginBottom
-                zoomButton!.frame.origin.y = windowButtonMarginBottom
-            }
+            let windowButtonMarginBottom = centerVertically || titlebarHeight < Self.TITLEBAR_HEIGHT_NORMAL
+                ? (titlebarHeight - Self.WINDOW_BUTTON_HEIGHT) / 2
+                : titlebarHeight - Self.WINDOW_BUTTON_HEIGHT - Self.WINDOW_BUTTON_MARGIN_TOP_NORMAL
             
-            if (centerVertically || titlebarHeight < Self.TITLEBAR_HEIGHT_NORMAL) && titleTextField != nil && titleVisibility != .hidden {
-                // if macOS delete the old titleTextField
-                if titleTextField!.superview == nil {
-                    titleTextField = nil
-                    for subView in titlebarView.subviews.reversed() {
-                        if (subView is NSTextField) {
-                            // Move titleTextField to bottom
-                            subView.removeFromSuperview()
-                            titlebarView.addSubview(subView, positioned: .below, relativeTo: nil)
-                            titleTextField = subView as? NSTextField
-                            break
-                        }
+            closeButton.frame.origin.y = windowButtonMarginBottom
+            miniaturizeButton!.frame.origin.y = windowButtonMarginBottom
+            zoomButton!.frame.origin.y = windowButtonMarginBottom
+        }
+        
+        if (centerVertically || titlebarHeight < Self.TITLEBAR_HEIGHT_NORMAL) && titleTextField != nil && titleVisibility != .hidden {
+            // if macOS delete the old titleTextField
+            if titleTextField!.superview == nil {
+                titleTextField = nil
+                for subView in titlebarView.subviews.reversed() {
+                    if (subView is NSTextField) {
+                        // Move titleTextField to bottom
+                        subView.removeFromSuperview()
+                        titlebarView.addSubview(subView, positioned: .below, relativeTo: nil)
+                        titleTextField = subView as? NSTextField
+                        break
                     }
                 }
-                if let titleTextField = titleTextField {
-                    titleTextField.frame.origin.x = (titlebarView.frame.size.width - titleTextField.frame.size.width) / 2
-                    titleTextField.frame.origin.y = (titlebarHeight - titleTextField.frame.size.height) / 2
-                }
             }
-            
-            if let contentView = contentView {
-                contentView.frame.size.height = frame.size.height - titlebarHeight
+            if let titleTextField = titleTextField {
+                titleTextField.frame.origin.x = (titlebarView.frame.size.width - titleTextField.frame.size.width) / 2
+                titleTextField.frame.origin.y = (titlebarHeight - titleTextField.frame.size.height) / 2
             }
-            
-            if let titlebarDecorationView = titlebarDecorationView {
-                titlebarDecorationView.frame.size.height = titlebarHeight
-            }
+        }
+        
+        if let contentView = contentView {
+            contentView.frame.size.height = frame.size.height - titlebarHeight
+        }
+        
+        if let titlebarDecorationView = titlebarDecorationView {
+            titlebarDecorationView.frame.size.height = titlebarHeight
         }
     }
 }
